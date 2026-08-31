@@ -46,15 +46,15 @@ u = 0; % we'll overwrite this below if we choose to turn on feedback.
 %%%% State Feedback using pole placement:
 
 % Desired location of poles
-% lambda1 = -1;
-% lambda2 = -2;
+lambda1 = -1;
+lambda2 = -2;
 
-%%% ALTERNATIVE LOCATIONS OF POLES - LET'S EXPERIMENT!
-sigma = -2; % the real part, determines the exponential decay rate
-omega = 10;  % the imaginary part, determines oscillations
-lambda1 = sigma + omega*i;
-lambda2 = sigma - omega*i;
-%%%
+% %%% ALTERNATIVE LOCATIONS OF POLES - LET'S EXPERIMENT!
+% sigma = -2; % the real part, determines the exponential decay rate
+% omega = 10;  % the imaginary part, determines oscillations
+% lambda1 = sigma + omega*i;
+% lambda2 = sigma - omega*i;
+% %%%
 
 % The linearized system dynamics are:
 A = [0,         1;
@@ -94,11 +94,19 @@ K = inv((Q*W)')*coeff_diff;
 x_traj = zeros(size(x0,1), n+1);
 x_traj(:,1) = x0;
 
+% It will be interesting and useful for us to see how the applied control
+% input (motor torque) changes over time, and with different choices of
+% controller. So let's save the values of u(t) as well.
+u_traj = zeros(1, n);
+
 % actual simulation! Use Forward Euler for now.
 for t=1:n
     %%%%% Calculate Control Input at this timestep
     % State Feedback
     u = -K'*x_traj(:,t);
+    % record the control input we're about to apply - this is for plotting
+    % later.
+    u_traj(t) = u;
     %%%%% DYNAMICS
     bolddotx_t = f_pendulum(x_traj(:,t), u, constants);
     % Forward Euler
@@ -176,7 +184,7 @@ end
 figure;
 hold on;
 grid on;
-title('Trajectory - all timepoints')
+title('Trajectory in space - all timepoints')
 xlabel('x1');
 ylabel('x2');
 xlim(limits);
@@ -184,10 +192,33 @@ ylim(limits);
 axis square;
 line(2*xlim, [0,0]);
 line([0,0], 2*ylim);
-% for a view of the 2D plane E1-E2,
+% for a view of the 2D plane,
 view(0, 90);
 scatter(r_traj(1,:), r_traj(2,:), massdotsize, "r", "filled");
 legend(["","","Pendulum Mass"]);
+
+% We can also plot the three time series trajectories of theta, dottheta,
+% and u
+figure;
+hold on;
+t = [0:dt:tmax];
+subplot(3,1,1);
+sgtitle('Trajectories of states and input');
+% theta
+plot(t, x_traj(1,:), 'r');
+xlabel('time (sec)');
+ylabel('theta (rad)');
+% velocity
+subplot(3,1,2);
+plot(t, x_traj(2,:), 'b');
+xlabel('time (sec)');
+ylabel('dtheta/dt (rad/sec)');
+% control input
+subplot(3,1,3);
+plot(t(1:end-1), u_traj, 'k'); % one fewer control input than timestep, there's no input at the end!
+xlabel('time (sec)');
+ylabel('control input (no units)');
+
 
 
 
