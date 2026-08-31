@@ -34,7 +34,7 @@ constants.tol = tol;
 
 %%%%% Initial conditions:
 
-theta_0 = pi/12; % mass angle from vertical. Positive is clockwise.
+theta_0 = 2*pi/3; % mass angle from vertical. Positive is clockwise.
 dottheta_0 = 0; % moving tangentially / rotation. tryL pi/24?
 x0 = [theta_0; dottheta_0];
 
@@ -46,8 +46,15 @@ u = 0; % we'll overwrite this below if we choose to turn on feedback.
 %%%% State Feedback using pole placement:
 
 % Desired location of poles
-lambda1 = -1;
-lambda2 = -2;
+% lambda1 = -1;
+% lambda2 = -2;
+
+%%% ALTERNATIVE LOCATIONS OF POLES - LET'S EXPERIMENT!
+sigma = -2; % the real part, determines the exponential decay rate
+omega = 10;  % the imaginary part, determines oscillations
+lambda1 = sigma + omega*i;
+lambda2 = sigma - omega*i;
+%%%
 
 % The linearized system dynamics are:
 A = [0,         1;
