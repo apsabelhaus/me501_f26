@@ -41,7 +41,7 @@ x0 = [theta_0; dottheta_0];
 %% Controller Design:
 
 %%%% Unactuated, no input (also called "free response" or "unforced")
-% u = 0;
+u = 0; % we'll overwrite this below if we choose to turn on feedback.
 
 %%%% State Feedback using pole placement:
 
@@ -91,7 +91,7 @@ x_traj(:,1) = x0;
 for t=1:n
     %%%%% Calculate Control Input at this timestep
     % State Feedback
-    u = K'*x_traj(:,t);
+    u = -K'*x_traj(:,t);
     %%%%% DYNAMICS
     bolddotx_t = f_pendulum(x_traj(:,t), u, constants);
     % Forward Euler
