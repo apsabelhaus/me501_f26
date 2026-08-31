@@ -40,8 +40,45 @@ x0 = [theta_0; dottheta_0];
 
 %% Controller Design:
 
-% Unactuated, no input (also called "free response")
-u = 0;
+%%%% Unactuated, no input (also called "free response" or "unforced")
+% u = 0;
+
+%%%% State Feedback using pole placement:
+
+% Desired location of poles
+lambda1 = -1;
+lambda2 = -2;
+
+% The linearized system dynamics are:
+A = [0,         1;
+     (g/ell),   -c];
+B = [0; b];
+
+% The controllability matrix for this system is
+Q = [B, A*B];
+% The change-of-basis matrix is
+W = [1, c;
+     0, 1];
+
+% Get the coefficients for the desired characteristic polynomial, given our
+% desired locations of poles. For a 2x2 system, the characteristic
+% polynomial is of the form:
+% det(sI - A) = s^2 + a1*s + s2
+% Our desired characteristic polynomial, with the desired eigenvalues, is:
+% p_d(s) = (s - \lambda_1)*(s - \lambda_2) = s^2 - (\lambda_1 + \lambda_2)s + \lambda_1*\lambda_2
+% Therefore, desired ("d") coefficients are:
+a1_d = -(lambda1 + lambda2);
+a2_d = lambda1*lambda2;
+
+% the coefficients for our unforced system are:
+a1 = -(A(1,1) + A(2,2));             % this is trace(A)
+a2 = A(1,1)*A(2,2) - A(1,2)*A(2,1);  % this is det(A);
+
+% Ackermann's formula (via the Astrom and Murray book), also called the 
+% Bass and Gura formula in the Friedland book,
+coeff_diff = [(a1_d-a1); (a2_d-a2)];
+K = inv((Q*W)')*coeff_diff;
+
 
 %% Simulate to obtain trajectory
 
@@ -52,8 +89,10 @@ x_traj(:,1) = x0;
 
 % actual simulation! Use Forward Euler for now.
 for t=1:n
+    %%%%% Calculate Control Input at this timestep
+    % State Feedback
+    u = K'*x_traj(:,t);
     %%%%% DYNAMICS
-    % Undamped:
     bolddotx_t = f_pendulum(x_traj(:,t), u, constants);
     % Forward Euler
     x_traj(:,t+1) = x_traj(:,t) + dt*bolddotx_t;
