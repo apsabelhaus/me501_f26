@@ -18,7 +18,7 @@ n = round(n);
 
 m = 5; % kg
 g = 9.81;
-c = 10; % damping, due to friction or air resistance or something similar
+c = 2; % damping, due to friction or air resistance or something similar
 ell = 0.5; % length of pendulum
 b = 0.1; % motor torque constant. Chosen arbitrarily for an example.
 tol = 10^4; % numerical tolerance for instability: if f(x) is greater than this, in any element, assume our simulation has encountered a big issue and stop integrating
@@ -34,8 +34,8 @@ constants.tol = tol;
 
 %%%%% Initial conditions:
 
-theta_0 = pi/6; % mass two angle from mass one
-dottheta_0 = 0; % moving tangentially / rotation. pi/24?
+theta_0 = pi/12; % mass angle from vertical. Positive is clockwise.
+dottheta_0 = 0; % moving tangentially / rotation. tryL pi/24?
 x0 = [theta_0; dottheta_0];
 
 %% Controller Design:
@@ -75,7 +75,7 @@ end
 
 % We will skip by a certain number of steps in order for the visualization
 % to go faster.
-speedup = 100;
+speedup = 50;
 n_speedup = n/speedup;
 
 % set up the figure
@@ -89,11 +89,14 @@ ylabel('x2 (meters)');
 % directions and use that.
 % here's a trick: max/min over all the particle's positions
 maxcoord = max([max(r_traj), -min(r_traj)]);
+% put a fudge factor on the plot so we can see better
+maxcoord = maxcoord *1.2;
 limits = [-maxcoord, maxcoord];
 xlim(limits);
 ylim(limits);
+axis square;
 % Pendulum mass dot size
-massdotsize = 50;
+massdotsize = 200;
 
 % plot some lines to visualize the x1, x2 axes
 line(2*xlim, [0,0]);
@@ -104,6 +107,9 @@ view(0, 90);
 
 % Initialize the first point
 r_handle = scatter(r_traj(1,1), r_traj(2,1), massdotsize, "r", "filled");
+% draw a line indicating a "massless" rigid rod connecting the pendulum tip
+% to the origin
+rod_handle = line([0; r_traj(1,1)], [0; r_traj(2,1)], "Color", 'b');
 
 % force MATLAB to render the whole figure before moving forward - computers
 % are funny
@@ -113,11 +119,10 @@ drawnow;
 for j=2:n_speedup
     % take the frames only at a certain interval.
     i=j*speedup;
-    % this removes the lines and points from our plot
-    delete(r_handle);
-    drawnow;
-    % replot now at the i-th timestep in the trajectory
-    r_handle = scatter(r_traj(1,i), r_traj(2,i), massdotsize, "r", "filled");
+    % Update the location of the mass
+    set(r_handle, 'XData', r_traj(1,i), 'YData', r_traj(2,i));
+    % Update the "massless rod" line
+    set(rod_handle, 'XData', [0; r_traj(1,i)], 'YData', [0; r_traj(2,i)]);
     drawnow;
 end
 
@@ -130,12 +135,13 @@ xlabel('x1');
 ylabel('x2');
 xlim(limits);
 ylim(limits);
+axis square;
 line(2*xlim, [0,0]);
 line([0,0], 2*ylim);
 % for a view of the 2D plane E1-E2,
 view(0, 90);
 scatter(r_traj(1,:), r_traj(2,:), massdotsize, "r", "filled");
-legend("Pendulum Mass");
+legend(["","","Pendulum Mass"]);
 
 
 
