@@ -70,7 +70,7 @@ W = [1, c;
 % Get the coefficients for the desired characteristic polynomial, given our
 % desired locations of poles. For a 2x2 system, the characteristic
 % polynomial is of the form:
-% det(sI - A) = s^2 + a1*s + s2
+% det(sI - A) = s^2 + a1*s + a2
 % Our desired characteristic polynomial, with the desired eigenvalues, is:
 % p_d(s) = (s - \lambda_1)*(s - \lambda_2) = s^2 - (\lambda_1 + \lambda_2)s + \lambda_1*\lambda_2
 % Therefore, desired ("d") coefficients are:
@@ -78,13 +78,20 @@ a1_d = -(lambda1 + lambda2);
 a2_d = lambda1*lambda2;
 
 % the coefficients for our unforced system are:
-a1 = -(A(1,1) + A(2,2));             % this is trace(A)
-a2 = A(1,1)*A(2,2) - A(1,2)*A(2,1);  % this is det(A);
+a1 = -(A(1,1) + A(2,2));             % this is -trace(A), = c
+a2 = A(1,1)*A(2,2) - A(1,2)*A(2,1);  % this is  det(A),   = -g/ell
+
+% and so the difference between desired characteristic polynomial
+% coefficients and unforced characteristic polynomial coefficients is
+coeff_diff = [(a1_d-a1); (a2_d-a2)];
 
 % Ackermann's formula (via the Astrom and Murray book), also called the 
-% Bass and Gura formula in the Friedland book,
-coeff_diff = [(a1_d-a1); (a2_d-a2)];
-K = inv((Q*W)')*coeff_diff;
+% Bass and Gura formula in the Friedland book (eqn. 6.34),
+% K = inv((Q*W)')*coeff_diff;
+
+% The Astrom and Murray book writes this transposed, which I like better.
+% (eqn. 7.21)
+K = coeff_diff' * inv(Q*W);
 
 
 %% Simulate to obtain trajectory
@@ -103,7 +110,7 @@ u_traj = zeros(1, n);
 for t=1:n
     %%%%% Calculate Control Input at this timestep
     % State Feedback
-    u = -K'*x_traj(:,t);
+    u = -K*x_traj(:,t);
     % record the control input we're about to apply - this is for plotting
     % later.
     u_traj(t) = u;
