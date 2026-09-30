@@ -46,8 +46,8 @@ u = 0; % we'll overwrite this below if we choose to turn on feedback.
 %%%% State Feedback using pole placement:
 
 % Desired location of poles
-lambda1 = -1;
-lambda2 = -2;
+lambda1 = -1+3*i;
+lambda2 = -1-3*i;
 
 % %%% ALTERNATIVE LOCATIONS OF POLES - LET'S EXPERIMENT!
 % sigma = -2; % the real part, determines the exponential decay rate
