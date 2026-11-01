@@ -5,6 +5,10 @@ clear all;
 close all;
 clc;
 
+% This displays decimal points past four digits. Useful for assessing
+% numerical accuracy.
+format long g;
+
 disp('Calculating and comparing open-loop control sequences for a simple 2x2 linear discrete-time system.')
 
 %% Setup: constants and initial conditions
@@ -20,7 +24,7 @@ xf = [0; 0];
 
 %% Control sequence calculations
 
-% For n=2:
+%%%% For n=2:
 
 Q = [B A*B];
 W = Q*Q';
@@ -28,99 +32,56 @@ disp('Rank of Q and W for n=2:')
 rank(Q)
 rank(W)
 
+u_10 = inv(Q)*(xf - (A^2)*x0)
+
+%%%% for n=3:
+
+Q3 = [B A*B A^2*B];
+W3 = Q3*Q3';
+disp('Rank of W3:')
+rank(W3)
+
+u_20 = Q3'*inv(W3)*(xf - (A^3)*x0)
 
 
-
-%% Simulate to obtain trajectory - Numerical, approximated!
+%% Simulate both sequences
 
 % insert our initial condition as the 1st element in traj
 % note that traj will have n+1 columns.
-x_traj = zeros(size(x0,1), n+1);
-x_traj(:,1) = x0;
+% for n=2:
+x_traj_fast = zeros(size(x0,1), 3);
+x_traj_fast(:,1) = x0;
+% for n=3:
+x_traj_efficient = zeros(size(x0,1), 4);
+x_traj_efficient(:,1) = x0;
 
-% actual simulation! Use Forward Euler for now.
-for t=1:n
-    %%%%% DYNAMICS
-    bolddotx_t = A*x_traj(:,t);
-    % Forward Euler
-    x_traj(:,t+1) = x_traj(:,t) + dt*bolddotx_t;
+% actual simulation. Dynamics are already in discrete time.
+
+% for purposes of indexing, it's useful to reverse the control input
+% vectors. Better to do it once, now, rather than try to remember indexing
+% later in the simulation loop.
+u_01 = flip(u_10);
+u_02 = flip(u_20);
+
+% minimum time solution, n=2. REmember matlab starts indexing at 1 rather
+% than zero.
+for t=1:2
+    x_traj_fast(:,t+1) = A*x_traj_fast(:,t) + B*u_01(t);
 end
 
-%% Exact Solution for comparison
-
-% let's precalculate for a one-to-one comparison
-x_traj_exact = zeros(size(x0,1), n+1);
-x_traj_exact(:,1) = x0;
-
-% For the specific A matrix above, we will learn how to perform the
-% "diagonalization" procedure to obtain A = V*D*inv(V), with these
-% matrices:
-V = [1, 1;
-     -2, -5];
-
-invV = [5/3, 1/3;
-        -2/3, -1/3];
-
-% D = [-2, 0; 0, -5]; % we won't use this D matrix directly, see below.
-
-% precalculate via iteration
-for k=1:n
-    % The exact solution is x(t) = e^(At)*x0
-    % Since "t" is inside the exponential, need to re-call this function
-    % each iteration.
-    t = k*dt; % here, k is index, dt is timestep, so total time is t.
-    %%%%% If exponentiating at each timestep:
-    % Phi_t = expm(A*t);
-    % x_traj_exact(:,k+1) = Phi_t*x0;
-    %%%%% If we have an exact solution available as a function:
-    eDt = [exp(-2*t), 0;
-           0, exp(-5*t)];
-    eAt = V*eDt*invV;
-    x_traj_exact(:,k+1) = eAt*x0;
+% minimum energy solution for n=3
+for t=1:3
+    x_traj_efficient(:,t+1) = A*x_traj_efficient(:,t) + B*u_02(t);
 end
 
-%% Simulate as a discrete time linear system
+disp('Trajectories, n=2 versus n=3:')
+x_traj_fast
+x_traj_efficient
 
-% Our claim is that x(k) = A_d^k x(0), where A_d = e^(A*deltaT)
-A_d = expm(A*dt);
+disp('Total energy consumption, n=2 versus n=3:')
+norm(u_01)^2
+norm(u_02)^2
 
-% let's precalculate for a one-to-one comparison
-x_traj_d = zeros(size(x0,1), n+1);
-x_traj_d(:,1) = x0;
-
-% the iteration is even simpler now!
-for k=1:n
-    x_traj_d(:,k+1) = A_d * x_traj_d(:,k);
-    % After class: try this one out, you should get the same result!
-    % x_traj_d(:,k+1) = A_d^k * x0;
-end
-
-%% Plot
-
-% We can also plot the three time series trajectories of theta, dottheta,
-% and u
-figure;
-hold on;
-t = [0:dt:tmax];
-subplot(2,1,1);
-sgtitle('Trajectories of states');
-% theta
-plot(t, x_traj(1,:), 'r');
-hold on;
-plot(t, x_traj_exact(1,:), 'b')
-plot(t, x_traj_d(1,:), 'g')
-legend(["Fwd Euler", "Exact Soln", "Discretized System"]);
-xlabel('time (sec)');
-ylabel('theta (rad)');
-% velocity
-subplot(2,1,2);
-plot(t, x_traj(2,:), 'r');
-hold on;
-plot(t, x_traj_exact(2,:), 'b')
-plot(t, x_traj_d(2,:), 'g')
-legend(["Fwd Euler", "Exact Soln", "Discretized System"]);
-xlabel('time (sec)');
-ylabel('dtheta/dt (rad/sec)');
 
 
 
