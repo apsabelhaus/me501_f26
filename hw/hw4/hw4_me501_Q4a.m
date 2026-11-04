@@ -45,7 +45,8 @@ Bd = eM(1:2,3)
 x_trajExact = zeros(size(x0,1), n+1);
 x_trajExact(:,1) = x0;
 
-% and a trajectory of the system in controllable canonical realization
+% and a trajectory of the system using forward euler integration for
+% comparison
 x_trajFW = zeros(size(x0,1), n+1);
 x_trajFW(:,1) = x0;
 
