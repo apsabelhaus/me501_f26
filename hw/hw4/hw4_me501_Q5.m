@@ -30,18 +30,18 @@ n = round(n);
 
 % Use the trick from the problem set to calculate both Ad and Bd at once,
 % using the matrix exponential.
-M = dt*[A, B; zeros(1,3)];
-eM = expm(M);
+M = FILL_THIS_IN;
+eM = FILL_THIS_IN;
 
 % Extract the top-left 2x2 matrix as Ad and the top-right 2x1 vector as Bd
-Ad = eM(1:2,1:2);
-Bd = eM(1:2,3);
+Ad = FILL_THIS_IN;
+Bd = FILL_THIS_IN;
 
 %% Calculate a sequence of control inputs
 
 % The number of timesteps here is T=n.
 xf = [0;0];
-u_Tk = u_min_sequence(Ad, Bd, n, x0, xf);
+u_Tk = FILL_THIS_IN;
 % remember, the sequence of inputs is opposite in time!
 % we need to apply u_kT rather than Tk.
 u_kT = flip(u_Tk);
@@ -79,7 +79,7 @@ for t=1:n
     x2 = xt(2);
     % The zero order hold means we simply apply the corresponding u as we
     % would in discrete time at this value of t=k*dt.
-    bolddotx_t = [x2; 4*sin(x1) - 3*x2 + u_kT(t)];
+    bolddotx_t = FILL_THIS_IN;
     % Forward Euler
     x_trajnonlin(:,t+1) = x_trajnonlin(:,t) + dt*bolddotx_t;
 end

@@ -18,17 +18,16 @@ function u_Tk = u_min_sequence(A, B, T, xk, xf)
 n = size(A,1);
 Q = zeros(n, T);
 
-for j=1:T
-    % This entry in the matrix is the j-1 power of A.
-    % MATLAB will interpret A^0 = I.
-    v = A^(j-1) * B;
-    Q(:,j) = v;
-end
+% One possibility is the following. Or calculate however you would like.
+% for j=1:T
+%     v = FILL_THIS_IN;
+%     Q(:,j) = v;
+% end
 
 % The grammian is then:
-W = Q*Q';
+W = FILL_THIS_IN;
 
 % and plugging in our full formula:
-u_Tk = Q'*inv(W)*(xf - (A^T)*xk);
+u_Tk = FILL_THIS_IN;
 
 end

@@ -10,12 +10,11 @@ disp('Calculating the zero-order hold discretization of continuous-time non-auto
 %% Setup
 
 % Continuous-time A and B matrices:
-A = [0 1;
-     4 -3];
-B = [0; 1];
+A = FILL_THIS_IN;
+B = FILL_THIS_IN;
 
 % We need to specify a sampling time:
-dt = 0.01;
+dt = 0.1;
 
 % We will also need an initial state:
 x0 = [pi/4; 0];
@@ -31,8 +30,8 @@ n = round(n);
 
 % Use the trick from the problem set to calculate both Ad and Bd at once,
 % using the matrix exponential.
-M = dt*[A, B; zeros(1,3)];
-eM = expm(M);
+M = FILL_THIS_IN;
+eM = FILL_THIS_IN;
 
 % Extract the top-left 2x2 matrix as Ad and the top-right 2x1 vector as Bd
 Ad = eM(1:2,1:2)

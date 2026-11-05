@@ -21,22 +21,18 @@ n = round(n);
 x0 = [0; 0; 0];
 
 % Please put the original A,B,C here:
-A1 = [-2 1 0;
-      1 -2 1;
-      0 1 -2];
+A1 = FILL_THIS_IN;
 
-B1 = [1; 0; 0];
+B1 = FILL_THIS_IN;
 
-C1 = [0 1 1];
+C1 = FILL_THIS_IN;
 
 % Please put the A,B,C in controllable canonical form here:
-A2 = [0 1 0;
-      0 0 1;
-      -4 -10 -6];
+A2 = FILL_THIS_IN;
 
-B2 = [0; 0; 1];
+B2 = FILL_THIS_IN;
 
-C2 = [3 1 0];
+C2 = FILL_THIS_IN;
 
 
 %% Simulate
@@ -70,11 +66,11 @@ end
 % Forward euler for the controllable canonical form realization
 for t=1:n
     %%%%% DYNAMICS
-    bolddotx_t = A2*x_trajCC(:,t) + B2*u;
+    bolddotx_t = FILL_THIS_IN;
     % Forward Euler
-    x_trajCC(:,t+1) = x_trajCC(:,t) + dt*bolddotx_t;
+    x_trajCC(:,t+1) = FILL_THIS_IN;
     % save the output too
-    y_trajCC(t+1) = C2*x_trajCC(:,t+1);
+    y_trajCC(t+1) = FILL_THIS_IN;
 end
 
 %% Plot

@@ -1,4 +1,4 @@
-%% hw4_me501_Q2e.m
+%% hw4_me501_Q3a.m
 % (C) Andrew Sabelhaus, 2026
 
 clear all;
@@ -11,11 +11,9 @@ disp('Calculating minimum energy control sequences.')
 
 % We're simulating a discrete-time system, so all we need is a total number
 % of timesteps. Call that T.
-T = 5;
+T = 3;
 
 % Our initial condition and goal final condition:
-% x0 = [1; 2; -2];
-% xf = [1; 1; 2];
 x0 = [1; 2; -2];
 xf = [0; 0; 0];
 
@@ -23,11 +21,9 @@ xf = [0; 0; 0];
 n = size(x0,1);
 
 % Please put the A and B matrices from problem 2 here:
-A = [ 0 0 0;
-      0 0.5 0;
-      0 0 -0.5];
+A = FILL_THIS_IN;
 
-B = [1; 1; 1];
+B = FILL_THIS_IN;
 
 %% Calculate a minimum energy sequence 
 
