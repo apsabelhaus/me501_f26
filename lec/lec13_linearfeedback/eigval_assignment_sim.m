@@ -25,7 +25,7 @@ B = [0;
 
 % Choose an arbitrary initial condition (we should observe stability
 % regardless of initial condition)
-x0 = [1; 1];
+x0 = [1; 1; 1];
 
 %% Control gains calculations
 
@@ -74,51 +74,102 @@ A_cl2 = A-B*K_2
 [V_2, D_2] = eig(A_cl2)
 
 
-%% Simulate both sequences
+%% Simulate both controllers
+
+% For now, we'll use Forward Euler, since you're more familiar with it,
+% but we should also expect to try out the Zero Order Hold exact
+% discretization for comparison.
+
+tmax = 5;
+dt = 0.01;
+n = tmax/dt; % number of timesteps, for loop-ing
+% somehow matlab doesn't round correctly. sometimes...
+n = round(n);
 
 % insert our initial condition as the 1st element in traj
 % note that traj will have n+1 columns.
-% for n=2:
-x_traj_fast = zeros(size(x0,1), 3);
-x_traj_fast(:,1) = x0;
-% for n=3:
-x_traj_efficient = zeros(size(x0,1), 4);
-x_traj_efficient(:,1) = x0;
+x_traj1 = zeros(size(x0,1), n+1);
+x_traj1(:,1) = x0;
+% Let's also save the u trajectory that we calculate, for later evaluation.
+u_traj1 = zeros(1, n);
+% For Approach 2:
+x_traj2 = zeros(size(x0,1), n+1);
+x_traj2(:,1) = x0;
+u_traj2 = zeros(1, n);
 
-% actual simulation. Dynamics are already in discrete time.
-
-% for purposes of indexing, it's useful to reverse the control input
-% vectors. Better to do it once, now, rather than try to remember indexing
-% later in the simulation loop.
-u_01 = flip(u_10);
-u_02 = flip(u_20);
-
-% minimum time solution, n=2. REmember matlab starts indexing at 1 rather
-% than zero.
-for t=1:2
-    x_traj_fast(:,t+1) = A*x_traj_fast(:,t) + B*u_01(t);
+% actual simulation! Use Forward Euler for now.
+% Approach 1:
+for t=1:n
+    % Calculate the control input at this time, u = -kx
+    u_t = -K_1*x_traj1(:,t);
+    u_traj1(t) = u_t; % save for plotting later
+    %%%%% DYNAMICS
+    bolddotx_t = A*x_traj1(:,t) + B*u_t;
+    % Forward Euler
+    x_traj1(:,t+1) = x_traj1(:,t) + dt*bolddotx_t;
+end
+% Approach 2:
+for t=1:n
+    % Calculate the control input at this time, u = -kx
+    u_t = -K_2*x_traj2(:,t);
+    u_traj2(t) = u_t; % save for plotting later
+    %%%%% DYNAMICS
+    bolddotx_t = A*x_traj2(:,t) + B*u_t;
+    % Forward Euler
+    x_traj2(:,t+1) = x_traj2(:,t) + dt*bolddotx_t;
 end
 
-% minimum energy solution for n=3
-for t=1:3
-    x_traj_efficient(:,t+1) = A*x_traj_efficient(:,t) + B*u_02(t);
-end
+%% Plot
 
-disp('Trajectories, n=2 versus n=3:')
-x_traj_fast
-x_traj_efficient
+% We can also plot the three time series trajectories of x and u
+figure;
+hold on;
+t = [0:dt:tmax];
+subplot(4,1,1);
+sgtitle('Simulation, Approach 1');
+% x1
+plot(t, x_traj1(1,:), 'r');
+hold on;
+legend(["Approach 1 (State Transf.)"]);
+ylabel('x1');
+% x2
+subplot(4,1,2);
+plot(t, x_traj1(2,:), 'r');
+ylabel('x2');
+% x3
+subplot(4,1,3);
+plot(t, x_traj1(3,:), 'r');
+ylabel('x3');
+% x4
+subplot(4,1,4);
+plot(t(1:end-1), u_traj1(:), 'r'); % there is one fewer control input than state, over time.
+ylabel('u');
+xlabel('time (sec)');
 
-disp('Total energy consumption, n=2 versus n=3:')
-norm(u_01)^2
-norm(u_02)^2
+% For the second approach:
 
-
-
-
-
-
-
-
+figure;
+hold on;
+subplot(4,1,1);
+sgtitle('Simulation, Approach 2');
+% x1
+plot(t, x_traj2(1,:), 'b');
+hold on;
+legend(["Approach 2 (Ackermanns Formula.)"]);
+ylabel('x1');
+% x2
+subplot(4,1,2);
+plot(t, x_traj2(2,:), 'b');
+ylabel('x2');
+% x3
+subplot(4,1,3);
+plot(t, x_traj2(3,:), 'b');
+ylabel('x3');
+% x4
+subplot(4,1,4);
+plot(t(1:end-1), u_traj2(:), 'b'); % there is one fewer control input than state, over time.
+ylabel('u');
+xlabel('time (sec)');
 
 
 
