@@ -140,7 +140,7 @@ ylabel('x2');
 subplot(4,1,3);
 plot(t, x_traj1(3,:), 'r');
 ylabel('x3');
-% x4
+% u
 subplot(4,1,4);
 plot(t(1:end-1), u_traj1(:), 'r'); % there is one fewer control input than state, over time.
 ylabel('u');
@@ -165,7 +165,7 @@ ylabel('x2');
 subplot(4,1,3);
 plot(t, x_traj2(3,:), 'b');
 ylabel('x3');
-% x4
+% u
 subplot(4,1,4);
 plot(t(1:end-1), u_traj2(:), 'b'); % there is one fewer control input than state, over time.
 ylabel('u');
