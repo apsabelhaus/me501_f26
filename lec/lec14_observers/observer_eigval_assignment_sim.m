@@ -56,6 +56,30 @@ disp('Closed loop A-LC with the state transformation method:')
 A_lc1 = A-L_1*C
 [V_1, D_1] = eig(A_lc1)
 
+%%%% Approach 2: Ackermann's formula
+
+% Calculate the observability matrix:
+N = [C;
+     C*A;
+     C*A^2];
+
+% ...but we really need its inverse:
+Ninv = inv(N);
+
+% The characteristic equation with our A but the desired a_bar
+% coefficients is:
+phi_d = A^3 + 15*(A^2) + 74*A + 120*eye(3)
+
+% the "row selector" vector is
+e3 = [0; 0; 1];
+
+% the gain matrix via this method is therefore:
+L_2 = phi_d*Ninv*e3
+
+disp('Closed loop A_-LC with Ackermanns formula:')
+A_lc2 = A-L_2*C
+[V_2, D_2] = eig(A_lc2)
+
 %% Simulate observer under some arbitrary controller
 
 % For now, we'll use Forward Euler, since you're more familiar with it,
