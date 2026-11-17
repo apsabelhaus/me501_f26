@@ -69,7 +69,7 @@ A_ocl = A-L*C
 % but we should also expect to try out the Zero Order Hold exact
 % discretization for comparison.
 
-tmax = 5;
+tmax = 3;
 dt = 0.01;
 n = tmax/dt; % number of timesteps, for loop-ing
 % somehow matlab doesn't round correctly. sometimes...
@@ -100,6 +100,7 @@ for t=1:n
     %%%%% OBSERVER
     % The output at this timestep is from the ground-truth states
     y_t = C*x_traj(:,t);
+    y_traj(t) = y_t;
     % The observer dynamics are:
     bolddotxhat_t = A*xhat_traj(:,t) + B*u_t + L*(y_t - C*xhat_traj(:,t));
     % Forward Euler:
@@ -112,24 +113,37 @@ end
 figure;
 hold on;
 t = [0:dt:tmax];
-subplot(4,1,1);
-sgtitle('Simulation:');
+subplot(5,1,1);
+sgtitle('Simulation: Linear Observer');
 % x1
+hold on;
 plot(t, x_traj(1,:), 'r');
+plot(t, xhat_traj(1,:), 'b');
 hold on;
 ylabel('x1');
+legend(["True", "Estimate"]);
 % x2
-subplot(4,1,2);
+subplot(5,1,2);
+hold on;
 plot(t, x_traj(2,:), 'r');
+plot(t, xhat_traj(2,:), 'b');
 ylabel('x2');
 % x3
-subplot(4,1,3);
+subplot(5,1,3);
+hold on;
 plot(t, x_traj(3,:), 'r');
+plot(t, xhat_traj(3,:), 'b');
 ylabel('x3');
 % u
-subplot(4,1,4);
+subplot(5,1,4);
+hold on;
 plot(t(1:end-1), u_traj(:), 'r'); % there is one fewer control input than state, over time.
 ylabel('u');
+% y
+subplot(5,1,5);
+hold on;
+plot(t(1:end-1), y_traj(:), 'r'); % there is one fewer observation than state, over time.
+ylabel('y');
 xlabel('time (sec)');
 
 
