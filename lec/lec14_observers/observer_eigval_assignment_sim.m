@@ -95,14 +95,17 @@ n = round(n);
 % insert our initial condition as the 1st element in traj
 % note that traj will have n+1 columns.
 x_traj = zeros(size(x0,1), n+1);
-x_traj(:,1) = x0;
 % Let's also save the u trajectory that we calculate, for later evaluation.
 u_traj = zeros(1, n);
+x_traj(:,1) = x0;
 % we'll also save the trajectory of outputs, and the trajectory of
 % estimated (observed) states.
-xhat_traj = zeros(size(x0,1), n+1);
-xhat_traj(:,1) = xhat_0;
+xhat1_traj = zeros(size(x0,1), n+1);
+xhat1_traj(:,1) = xhat_0;
 y_traj = zeros(1, n);
+% We'll simulate both methods at the same time
+xhat2_traj = zeros(size(x0,1), n+1);
+xhat2_traj(:,1) = xhat_0;
 
 % actual simulation! Use Forward Euler for now.
 for t=1:n
@@ -119,9 +122,11 @@ for t=1:n
     y_t = C*x_traj(:,t);
     y_traj(t) = y_t;
     % The observer dynamics are:
-    bolddotxhat_t = A*xhat_traj(:,t) + B*u_t + L_1*(y_t - C*xhat_traj(:,t));
+    bolddotxhat1_t = A*xhat1_traj(:,t) + B*u_t + L_1*(y_t - C*xhat1_traj(:,t));
+    bolddotxhat2_t = A*xhat1_traj(:,t) + B*u_t + L_2*(y_t - C*xhat2_traj(:,t));
     % Forward Euler:
-    xhat_traj(:,t+1) = xhat_traj(:,t) + dt*bolddotxhat_t;
+    xhat1_traj(:,t+1) = xhat1_traj(:,t) + dt*bolddotxhat1_t;
+    xhat2_traj(:,t+1) = xhat2_traj(:,t) + dt*bolddotxhat2_t;
 end
 
 %% Plot
@@ -131,11 +136,11 @@ figure;
 hold on;
 t = [0:dt:tmax];
 subplot(5,1,1);
-sgtitle('Simulation: Linear Observer');
+sgtitle('Simulation: Linear Observer, State Transformation');
 % x1
 hold on;
 plot(t, x_traj(1,:), 'r');
-plot(t, xhat_traj(1,:), 'b');
+plot(t, xhat1_traj(1,:), 'b');
 hold on;
 ylabel('x1');
 legend(["True", "Estimate"]);
@@ -143,13 +148,13 @@ legend(["True", "Estimate"]);
 subplot(5,1,2);
 hold on;
 plot(t, x_traj(2,:), 'r');
-plot(t, xhat_traj(2,:), 'b');
+plot(t, xhat1_traj(2,:), 'b');
 ylabel('x2');
 % x3
 subplot(5,1,3);
 hold on;
 plot(t, x_traj(3,:), 'r');
-plot(t, xhat_traj(3,:), 'b');
+plot(t, xhat1_traj(3,:), 'b');
 ylabel('x3');
 % u
 subplot(5,1,4);
@@ -163,7 +168,42 @@ plot(t(1:end-1), y_traj(:), 'r'); % there is one fewer observation than state, o
 ylabel('y');
 xlabel('time (sec)');
 
-
+% For the second simulation:
+figure;
+hold on;
+t = [0:dt:tmax];
+subplot(5,1,1);
+sgtitle('Simulation: Linear Observer, Ackermanns Formula');
+% x1
+hold on;
+plot(t, x_traj(1,:), 'r');
+plot(t, xhat2_traj(1,:), 'g');
+hold on;
+ylabel('x1');
+legend(["True", "Estimate"]);
+% x2
+subplot(5,1,2);
+hold on;
+plot(t, x_traj(2,:), 'r');
+plot(t, xhat2_traj(2,:), 'g');
+ylabel('x2');
+% x3
+subplot(5,1,3);
+hold on;
+plot(t, x_traj(3,:), 'r');
+plot(t, xhat2_traj(3,:), 'g');
+ylabel('x3');
+% u
+subplot(5,1,4);
+hold on;
+plot(t(1:end-1), u_traj(:), 'r'); % there is one fewer control input than state, over time.
+ylabel('u');
+% y
+subplot(5,1,5);
+hold on;
+plot(t(1:end-1), y_traj(:), 'r'); % there is one fewer observation than state, over time.
+ylabel('y');
+xlabel('time (sec)');
 
 
 
